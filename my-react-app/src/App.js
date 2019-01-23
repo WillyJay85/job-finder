@@ -3,6 +3,13 @@ import './App.css';
 import Input from './Input.js'
 import Networking from './Networking.js'
 class App extends Component {
+  constructor() {
+    super()
+    this.state= {
+      jobs: []
+    }
+  }
+
   render() {
     return (
       <div>
