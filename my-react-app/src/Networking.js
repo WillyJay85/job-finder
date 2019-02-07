@@ -9,7 +9,7 @@ class Networking extends Component {
         super(props)
         this.state = {
             contact: '',
-            numOfTouches: 0,
+            numOfTouches: '',
             interviewDate2: '',
             notesOfInterview2: '',
             offer: false,
