@@ -5,20 +5,21 @@ const BaseJoi = require('joi');
 const Extension = require('joi-date-extensions');
 const Joi = BaseJoi.extend(Extension);
 
+
 const ListJobs = (props) => {
     return (
         <table>
             <tbody>
                 {props.jobs.map((job) => {
                     return (
-                        <tr key={job.id} onClick={e => props.onJobSelected(e, job)} >
+                        <tr key={job.ID} onClick={e => props.onJobSelected(e, job)} >
                             <td></td>
-                            <td>jobTargetDate</td>
-                            <td>appSubmittedTo</td>
-                            <td>interviewDate1</td>
-                            <td>notesOfInterview1</td>
-                            <td>offer</td>
-                            <td>salary</td>
+                            <td>{job.jobTargetDate}</td>
+                            <td>{job.appSubmittedTo}</td>
+                            <td>{job.interviewDate1}</td>
+                            <td>{job.notesOfInterview1}</td>
+                            <td>{job.offer}</td>
+                            <td>{job.salary}</td>
                         </tr>
                     )
                 }
@@ -47,8 +48,8 @@ class Input extends Component {
             appSubmittedTo: '',
             interviewDate1: '',
             notesOfInterview1: '',
-            offer: false,
-            salary: 0.0,
+            offer: '',
+            salary: '',
             newJob: {
                 appSubmittedTo: '',
                 interviewDate1: '',
@@ -87,7 +88,7 @@ class Input extends Component {
             .then(res => res.json())
             .then(response => {
                 console.log(response)
-                this.setState({ jobs: response })
+                this.setState({ jobs: response.jobs })
             })
             .catch(err => {
                 console.log(err)
@@ -211,17 +212,17 @@ class Input extends Component {
                 <h1>Job Tracker</h1>
                 <form>
                     Job target date:
-                    <input type="text" name="jobTargetDate" value={this.state.appSubmittedTo} onChange={this.handleChange}/> /><button>Set</button> <br></br>
+                    <input type="text" name="jobTargetDate" value={this.state.jobTargetDate} onChange={this.handleChange} /><button>Set</button> <br></br>
                     Application submitted to:
                 <input type="text" name="appSubmittedTo" value={this.state.appSubmittedTo} onChange={this.handleChange}/>
                     Interview date 1:
-                    <input type="text" name="interviewDate1" value={this.state.appSubmittedTo} onChange={this.handleChange}/>
+                    <input type="text" name="interviewDate1" value={this.state.interviewDate1} onChange={this.handleChange}/>
                     Notes of Interview 1:
-                    <input type="text" name="notesOfInterview1" value={this.state.appSubmittedTo} onChange={this.handleChange}/>
+                    <input type="text" name="notesOfInterview1" value={this.state.notesOfInterview1} onChange={this.handleChange}/>
                     Offer?:
-                    <input type="text" name="offer" value={this.state.appSubmittedTo} onChange={this.handleChange}/>
+                    <input type="text" name="offer" value={this.state.offer} onChange={this.handleChange}/>
                     Salary:
-                    <input type="text" name="salary" value={this.state.appSubmittedTo} onChange={this.handleChange}/> <button onClick={e => this.handleButtonClick(e)}>Submit</button>
+                    <input type="text" name="salary" value={this.state.salary} onChange={this.handleChange}/> <button onClick={e => this.handleButtonClick(e)}>Submit</button>
                 </form>
                 <ListJobs jobs={this.state.jobs} selectHandler={this.jobSelected} />
             </div>
