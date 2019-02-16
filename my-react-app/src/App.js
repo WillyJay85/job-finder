@@ -19,7 +19,7 @@ class App extends Component {
             
         </div>
         <div className="App2">
-          <Networking></Networking>
+          {/* <Networking></Networking> */}
           </div>
           <div className="Job">
           <Job></Job>

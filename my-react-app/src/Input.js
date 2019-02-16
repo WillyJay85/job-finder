@@ -5,6 +5,23 @@ const BaseJoi = require('joi');
 const Extension = require('joi-date-extensions');
 const Joi = BaseJoi.extend(Extension);
 
+const postJob = (job) => { 
+    return fetch("http://localhost:8000/jobs",{    
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(job)
+    })
+}
+
+const putJob = (job) => {
+   return fetch(`http://localhost:8000/jobs/${job.ID}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(job)
+    })
+}
 
 const ListJobs = (props) => {
     return (
@@ -28,17 +45,6 @@ const ListJobs = (props) => {
         </table>
     )
 }
-// {
-//     this.state.jobs.map(
-//         (job, i) => {
-//             return (
-
-//             )
-//         }
-//     )
-// }
-//     )
-// }
 
 class Input extends Component {
     constructor(props) {
@@ -69,7 +75,10 @@ class Input extends Component {
         })
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.loadjobs = this.loadjobs.bind(this)
+        this.loadJobs = this.loadJobs.bind(this)
+        this.handleJobSubmit = this.handleJobSubmit.bind(this)
+        this.insertJob = this.insertJob.bind(this)
+        this.updateJob = this.updateJob.bind(this)
     }
     handleChange(event) {
         this.setState({ [event.target.name]: event.target.value });
@@ -80,7 +89,7 @@ class Input extends Component {
     }
 
     // load jobs
-    loadjobs() {
+    loadJobs() {
         fetch("http://localhost:8000/jobs",
             {
                 method: "GET",
@@ -97,22 +106,25 @@ class Input extends Component {
     }
 
     componentDidMount() {
-        this.loadjobs()
+        this.loadJobs()
     }
 
-    insertJob() {
-        const test = {
-            jobTargetDate: this.state.jobTargetDate,
-            appSubmittedTo: this.state.appSubmittedTo,
-            interviewDate1: this.state.interviewDate1,
-            notesOfInterview1: this.state.notesOfInterview1,
-            offer: this.state.offer,
-            salary: this.state.salary
-        }
+    insertJob(job) {
+        console.log('calling post job')
+        postJob(job)
+        .then(() => {
+            console.log('post job complete')
+            this.loadJobs()
+        })
+        .catch(error =>{
+            console.log(error)
+            Promise.reject(error)
+        })
     }
 
-    handleButtonClick(event) {
-        const test = {
+    handleJobSubmit(event) {
+        event.preventDefault()
+        const job = {
             jobTargetDate: this.state.jobTargetDate,
             appSubmittedTo: this.state.appSubmittedTo,
             interviewDate1: this.state.interviewDate1,
@@ -120,61 +132,28 @@ class Input extends Component {
             offer: this.state.offer,
             salary: this.state.salary
         };
-        fetch("http://localhost:8000/jobs",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(test)
-            })
-            .then(res => res.json())
-            .then(response => {
-                console.log(response)
-                this.loadjobs()
-            })
-            .catch(err => {
-                console.log(err)
-                throw err
-            })
-    }
-
-
-    updateJobs() {
-        const test = {
-            jobTargetDate: this.state.jobTargetDate,
-            appSubmittedTo: this.state.appSubmittedTo,
-            interviewDate1: this.state.interviewDate1,
-            notesOfInterview1: this.state.notesOfInterview1,
-            offer: this.state.offer,
-            salary: this.state.salary
+        if (this.state.jobID) {
+            job.ID = this.state.jobID
+            this.updateJob(job)
         }
-        console.log(test)
-
-        fetch('http://localhost:8000/jobs/${this.state.id}', {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(test)
-        })
-            .then(res => res.json())
-            .then(response => {
-                this.loadjobs();
-            })
-            .catch(err => {
-                this.setState({ errmessage: err.message })
-            })
+        else {
+            this.insertJob(job)
+        }
+        
     }
 
-    // event.preventDefault()
-    // const newJobTemp = {
-    //     appSubmittedTo: this.state.appSubmittedTo.value,
-    //     interviewDate1: this.state.interviewDate1.value,
-    //     notesOfInterview1: this.state.notesOfInterview1.value,
-    //     offer: this.state.offer.value,
-    //     salary: this.state.salary.value
-    // }
-    // this.setState({ newJob: newJobTemp.jobs })
 
+    updateJob(job) {
+        
+        putJob(job)
+        .then(() =>{
+            this.loadJobs()
+        }) 
+        .catch(error =>{
+            console.log(error)
+            Promise.reject(error)
+        })
+    }
 
     showErrorMessage = () => {
         if (this.state.message) {
@@ -186,20 +165,18 @@ class Input extends Component {
         event.preventDefault();
         (this.state.id !== '') ? this.updateJobs() : this.insertJobs()
     }
-    // renderJobs = () => {
-    //     console.log(this.state)
-    //     if (this.state.jobs)
-    //     return this.state.jobs.map(
-    //         (job, i) => {
-    //             return (
-    //                 <Job key={i} title={job.title} selectHandler={()=>{this.jobSelected(job)}} deleteHandler={()=>{this.jobDeleted(job._id)}} allowDelete={true} />
 
-    //             )
-    //         }
-    //     )
-    // }
-
-    jobSelected = () => { }
+    jobSelected = (event, job) => { 
+        this.setState({
+            jobTargetDate: job.jobTargetDate,
+            appSubmittedTo: job.appSubmittedTo,
+            interviewDate1: job.interviewDate1,
+            notesOfInterview1: job.notesOfInterview1,
+            offer: job.offer,
+            salary: job.salary,
+            jobID: job.ID
+        })
+    }
 
     jobDeleted = () => { }
 
@@ -210,7 +187,7 @@ class Input extends Component {
             <div className="App">
                 <div className="head" />
                 <h1>Job Tracker</h1>
-                <form>
+                <form onSubmit = {this.handleJobSubmit}>
                     Job target date:
                     <input type="text" name="jobTargetDate" value={this.state.jobTargetDate} onChange={this.handleChange} /><button>Set</button> <br></br>
                     Application submitted to:
@@ -222,9 +199,13 @@ class Input extends Component {
                     Offer?:
                     <input type="text" name="offer" value={this.state.offer} onChange={this.handleChange}/>
                     Salary:
-                    <input type="text" name="salary" value={this.state.salary} onChange={this.handleChange}/> <button onClick={e => this.handleButtonClick(e)}>Submit</button>
+                    <input type="text" name="salary" value={this.state.salary} onChange={this.handleChange}/><br></br> 
+                    <button type="submit">Submit</button>
+                    <button onClick={e => this.handlejobDeleted(e)}>Delete</button>
                 </form>
-                <ListJobs jobs={this.state.jobs} selectHandler={this.jobSelected} />
+                <div className="Data">
+                <ListJobs jobs={this.state.jobs} onJobSelected={this.jobSelected} />
+                </div>
             </div>
         )
     }
