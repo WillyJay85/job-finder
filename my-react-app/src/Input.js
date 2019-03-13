@@ -79,6 +79,7 @@ class Input extends Component {
         this.handleJobSubmit = this.handleJobSubmit.bind(this)
         this.insertJob = this.insertJob.bind(this)
         this.updateJob = this.updateJob.bind(this)
+        this.jobDeleted = this.jobDeleted.bind(this)
     }
     handleChange(event) {
         this.setState({ [event.target.name]: event.target.value });
@@ -86,6 +87,12 @@ class Input extends Component {
     handleSubmit(event) {
         alert('An entry was submitted: ' + this.state);
         event.preventDefault();
+    }
+
+    handleDelete(event) {
+        event.preventDefault();
+
+        this.state.jobID && this.jobDeleted(this.state.jobID)
     }
 
     // load jobs
@@ -178,7 +185,22 @@ class Input extends Component {
         })
     }
 
-    jobDeleted = () => { }
+    jobDeleted = (event) => { 
+        event.preventDefault();
+        console.log(`deleting ${this.state.jobID}`)
+        fetch(`http://localhost:8000/jobs/${this.state.jobID}`,{
+            method: "DELETE"
+        })
+        .then(res => res.json())
+        .then(response => {
+            console.log('delete completed')
+            this.loadJobs();
+        })
+        .catch(err =>{
+            console.error(err)
+            this.setState({errmessage: err.message})
+        })
+    }
 
 
     allowDelete = true
@@ -201,7 +223,7 @@ class Input extends Component {
                     Salary:
                     <input type="text" name="salary" value={this.state.salary} onChange={this.handleChange}/><br></br> 
                     <button type="submit">Submit</button>
-                    <button onClick={e => this.handlejobDeleted(e)}>Delete</button>
+                    <button onClick={e => this.jobDeleted(e)}>Delete</button>
                 </form>
                 <div className="Data">
                 <ListJobs jobs={this.state.jobs} onJobSelected={this.jobSelected} />
